@@ -1,12 +1,13 @@
 #include<iostream>
 #include<string>
 #include<string.h>
+#include <bits/stdc++.h>
 using namespace std;
 struct option
 {
     char name;
     bool ifargs = false;
-    char* args = NULL;
+    string args;
 };
 void sort_ops(option* ops, int op_num){
     for (int i = 0; i < op_num - 1; i++)
@@ -22,6 +23,8 @@ void sort_ops(option* ops, int op_num){
         }
     }
 }
+char forop[20*128][128];
+int forop_index = 0;
 int main(){
     //处理选项
     string format;
@@ -47,84 +50,67 @@ int main(){
     cin>>N;  //命令行个数
     cin.ignore();  //非常重要，清除未消除的\n
     char const *split = " ";
+    string s;
     for (int k = 1; k <= N; k++)
     {
-        char cmd[256];
-        cin.getline(cmd, 256);
-        char* token;
-        token = strtok(cmd, split);
-        token = strtok(NULL, split);
-        bool need_args = false;
-        option* last_op_ptr;
         option com_op[128];
         int com_op_num = 0;
-        while (token != NULL)
+        string t;
+        getline(cin, s);
+        stringstream ss(s);
+        ss >> t;
+        while (ss >> t)
         {
-            if(token[0] == '-'){  //有可能是选项
-                char option = token[1];
-                int flag = false;  //先假设不是选项
-                for (int i = 0; i < option_num; i++)
-                {
-                    if(op[i].name == option){  //是已有的选项
-                        //考虑当前是不是需要参数而非选项
-                        if (need_args == true)
-                        {
-                            goto label;
-                        }
-                        int com_flag = false;  //有没有出现过
-                        for (int j = 0; j < com_op_num; j++)
-                        {
-                            if(com_op[j].name == option){
-                                com_flag = true;
-                                if(com_op[j].ifargs == true){
-                                    //出现过，需要参数
-                                    need_args = true;
-                                    last_op_ptr = &com_op[j];
-                                }else{
-                                    //出现过，不需要参数
-                                    need_args = false;
+            string tt;
+            if(t.length() == 2){
+                if(t[0] == '-'){
+                    int find_flag = false;
+                    for (int i = 0; i < option_num; i++)
+                    {
+                        if(op[i].name == t[1]){
+                            find_flag = true;
+                            //看看是不是出现过
+                            int com_flag = false;
+                            for (int j = 0; j < com_op_num; j++)
+                            {
+                                if(com_op[j].name == t[1]){
+                                    com_flag = true;
+                                    if(com_op[j].ifargs){
+                                        if (ss.eof())
+                                            goto break_label;
+                                        ss >> tt;
+                                        com_op[j].args = tt;
+                                    }
+                                    break;
                                 }
-                                break;
                             }
-                        }
-                        if(!com_flag){  //此前没有出现过
-                            com_op[com_op_num] = op[i];
-                            need_args = com_op[com_op_num].ifargs;
-                            if(com_op[com_op_num].ifargs == true){  //需要参数
-                                last_op_ptr = &com_op[com_op_num];
+                            if(!com_flag){
+                                if(op[i].ifargs){
+                                    if (ss.eof())
+                                        goto break_label;
+                                }
+                                com_op[com_op_num] = op[i];
+                                if(com_op[com_op_num].ifargs == true){
+                                    ss >> tt;
+                                    com_op[com_op_num].args = tt;
+                                }
+                                com_op_num++;
                             }
-                            com_op_num++;
+                            break;
                         }
-                        flag = true;
+                    }
+                    if(!find_flag){
+                        
                         break;
                     }
                 }
-                if(!flag){  //不是选项，作为参数
-                    goto label;
+                else{
+                    break;
                 }
-            }else{  //一定是参数
-                label:
-                if (!need_args)
-                {  //不需要参数
-                    goto break_label;
-                }else{  //需要参数
-                    //更新参数
-                    char tmp[128];
-                    int t = 0;
-                    while (token[t] != '\0')
-                    {
-                        tmp[t] = token[t];
-                        t++;
-                    }
-                    tmp[t] = '\0';
-                    last_op_ptr->args = tmp;
-                }
-                need_args = false;
             }
-            token = strtok(NULL, split);
-        }
-        if(need_args){
-            com_op_num--;
+            else{
+                break;
+            }
         }
         break_label:
         cout<<"Case "<<k<<":";
@@ -133,12 +119,12 @@ int main(){
         for (int i = 0; i < com_op_num; i++)
         {
             cout<<" -"<<com_op[i].name;
-            if (com_op[i].ifargs && com_op[i].args != NULL)
+            if (com_op[i].ifargs)
             {
                 cout<<" "<<com_op[i].args;
             }
         }
-        cout<<endl;
+        cout<<endl; 
     }
     return 0;
 }
