@@ -23,8 +23,8 @@ void sort_ops(option* ops, int op_num){
         }
     }
 }
-char forop[20*128][128];
-int forop_index = 0;
+//最主要的思想就是参数是依附于选项的，我们只需要处理选项，需要参数是接着读入一个参数就好
+//学到的工具：stringtream ss(s); ss >> t;  cin.ignore();
 int main(){
     //处理选项
     string format;
@@ -49,7 +49,6 @@ int main(){
     int N;
     cin>>N;  //命令行个数
     cin.ignore();  //非常重要，清除未消除的\n
-    char const *split = " ";
     string s;
     for (int k = 1; k <= N; k++)
     {
